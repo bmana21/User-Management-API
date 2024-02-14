@@ -1,9 +1,10 @@
 package org.example.usermanagementapi.controller;
 
 import org.example.usermanagementapi.model.dto.CreateUserDTO;
-import org.example.usermanagementapi.model.dto.UserDTO;
+import org.example.usermanagementapi.model.dto.UserResponseDTO;
 import org.example.usermanagementapi.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,18 +21,24 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CreateUserDTO createUserDTO) {
-        userService.create(createUserDTO);
-        return ResponseEntity.ok().build();
+        UserResponseDTO userResponseDTO = userService.create(createUserDTO);
+        return switch (userResponseDTO.getStatus()) {
+            case 201 -> ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
+            case 400 -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Username or Password");
+            case 409 -> ResponseEntity.status(HttpStatus.CONFLICT).body("Username Already exists");
+            default -> ResponseEntity.ok().build();
+        };
+
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         // TODO
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
         // TODO
         return ResponseEntity.ok().build();
     }
