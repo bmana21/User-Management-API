@@ -22,7 +22,6 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CreateUserDTO createUserDTO) {
         UserResponseDTO userResponseDTO = userService.create(createUserDTO);
-        System.out.println(userResponseDTO.getStatus());
         return switch (userResponseDTO.getStatus()) {
             case 201 -> ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
             case 400 -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Username or Password");
@@ -34,7 +33,14 @@ public class UserController {
 
     @GetMapping(params = {"username", "password"})
     public ResponseEntity<?> authenticateUser(@RequestParam("username") String username, @RequestParam("password") String password) {
-        return ResponseEntity.ok().build();
+        UserResponseDTO userResponseDTO = userService.authenticate(username, password);
+        return switch (userResponseDTO.getStatus()) {
+            case 200 -> ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
+            case 404 ->
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with username %s does not exist", username));
+            case 401 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Password is incorrect");
+            default -> ResponseEntity.ok().build();
+        };
     }
 
     @GetMapping

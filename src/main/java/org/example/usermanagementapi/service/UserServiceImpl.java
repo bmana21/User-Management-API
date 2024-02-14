@@ -34,6 +34,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDTO authenticate(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return new UserResponseDTO(404);
+        }
+        String passwordHash = PasswordHashing.hashPassword(password);
+        if (!passwordHash.equals(user.getPasswordHash())) {
+            return new UserResponseDTO(401);
+        }
+        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), user.getFirstname(), user.getSurname());
+    }
+
+    @Override
     public List<UserResponseDTO> retrieveAll() {
         return null;
     }

@@ -8,6 +8,8 @@ import java.util.List;
 public interface UserService {
     UserResponseDTO create(CreateUserDTO createUserDTO);
 
+    UserResponseDTO authenticate(String username, String password);
+
     List<UserResponseDTO> retrieveAll();
 
     UserResponseDTO findById(Long id);
