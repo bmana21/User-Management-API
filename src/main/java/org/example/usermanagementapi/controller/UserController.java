@@ -1,5 +1,6 @@
 package org.example.usermanagementapi.controller;
 
+import org.example.usermanagementapi.model.dto.AllUsersResponseDTO;
 import org.example.usermanagementapi.model.dto.CreateUserDTO;
 import org.example.usermanagementapi.model.dto.UserResponseDTO;
 import org.example.usermanagementapi.service.interfaces.UserService;
@@ -44,8 +45,12 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> getAllUsers() {
+        AllUsersResponseDTO allUsersResponseDTO = userService.retrieveAll();
+        return switch (allUsersResponseDTO.getStatus()) {
+            case 200 -> ResponseEntity.status(HttpStatus.OK).body(allUsersResponseDTO);
+            default -> ResponseEntity.ok().build();
+        };
     }
 
     @GetMapping(params = "userId")

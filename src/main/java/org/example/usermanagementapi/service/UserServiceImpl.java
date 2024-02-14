@@ -1,5 +1,6 @@
 package org.example.usermanagementapi.service;
 
+import org.example.usermanagementapi.model.dto.AllUsersResponseDTO;
 import org.example.usermanagementapi.model.dto.CreateUserDTO;
 import org.example.usermanagementapi.model.dto.UserResponseDTO;
 import org.example.usermanagementapi.model.entity.User;
@@ -47,8 +48,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDTO> retrieveAll() {
-        return null;
+    public AllUsersResponseDTO retrieveAll() {
+        List<User> allUsers = userRepository.findAll();
+        AllUsersResponseDTO allUsersResponseDTO = new AllUsersResponseDTO(200);
+        for (User user : allUsers) {
+            allUsersResponseDTO.addUser(user.getUserId(), user.getUsername(), user.getFirstname(), user.getSurname());
+        }
+        return allUsersResponseDTO;
     }
 
 
