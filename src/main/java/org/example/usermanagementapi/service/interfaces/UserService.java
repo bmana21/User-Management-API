@@ -10,7 +10,5 @@ public interface UserService {
 
     List<UserResponseDTO> retrieveAll();
 
-    UserResponseDTO findByEmail(String email);
-
-    UserResponseDTO findById(String id);
+    UserResponseDTO findById(Long id);
 }

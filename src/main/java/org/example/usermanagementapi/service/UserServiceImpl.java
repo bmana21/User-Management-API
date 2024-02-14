@@ -36,13 +36,13 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    @Override
-    public UserResponseDTO findByEmail(String email) {
-        return null;
-    }
 
     @Override
-    public UserResponseDTO findById(String id) {
-        return null;
+    public UserResponseDTO findById(Long id) {
+        User user = userRepository.findByUserId(id);
+        if (user == null) {
+            return new UserResponseDTO(404);
+        }
+        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), user.getFirstname(), user.getSurname());
     }
 }
