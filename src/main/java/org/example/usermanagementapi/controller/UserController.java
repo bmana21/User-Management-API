@@ -32,6 +32,11 @@ public class UserController {
 
     }
 
+    @GetMapping(params = {"username", "password"})
+    public ResponseEntity<?> authenticateUser(@RequestParam("username") String username, @RequestParam("password") String password) {
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok().build();

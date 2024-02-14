@@ -5,6 +5,7 @@ import org.example.usermanagementapi.model.dto.UserResponseDTO;
 import org.example.usermanagementapi.model.entity.User;
 import org.example.usermanagementapi.repository.UserRepository;
 import org.example.usermanagementapi.service.interfaces.UserService;
+import org.example.usermanagementapi.util.PasswordHashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,8 @@ public class UserServiceImpl implements UserService {
         if (createUserDTO.getPassword().isEmpty() || createUserDTO.getPassword().length() > 32) {
             return new UserResponseDTO(400);
         }
-        User newUser = new User(createUserDTO.getUsername(), createUserDTO.getPassword(), createUserDTO.getFirstname(), createUserDTO.getSurname());
+        String passwordHash = PasswordHashing.hashPassword(createUserDTO.getPassword());
+        User newUser = new User(createUserDTO.getUsername(), passwordHash, createUserDTO.getFirstname(), createUserDTO.getSurname());
         userRepository.save(newUser);
         return new UserResponseDTO(201, newUser.getUserId(), createUserDTO.getUsername(), createUserDTO.getFirstname(), createUserDTO.getSurname());
     }
