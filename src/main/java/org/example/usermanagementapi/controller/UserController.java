@@ -2,7 +2,7 @@ package org.example.usermanagementapi.controller;
 
 import org.example.usermanagementapi.model.dto.CreateUserDTO;
 import org.example.usermanagementapi.model.dto.UserDTO;
-import org.example.usermanagementapi.service.UserService;
+import org.example.usermanagementapi.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +20,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CreateUserDTO createUserDTO) {
-        // TODO
+        userService.create(createUserDTO);
         return ResponseEntity.ok().build();
     }
 
