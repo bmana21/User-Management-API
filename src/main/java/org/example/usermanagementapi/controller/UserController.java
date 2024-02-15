@@ -22,59 +22,105 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CreateUserDTO createUserDTO) {
         UserResponseDTO userResponseDTO = userService.create(createUserDTO);
-        return switch (userResponseDTO.getStatus()) {
-            case 201 -> ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
-            case 400 -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Username or Password");
-            case 409 -> ResponseEntity.status(HttpStatus.CONFLICT).body("Username Already exists");
-            default -> ResponseEntity.ok().build();
-        };
+        ResponseEntity<?> responseEntity;
+
+        switch (userResponseDTO.getStatus()) {
+            case 201:
+                responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
+                break;
+            case 400:
+                responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Username or Password");
+                break;
+            case 409:
+                responseEntity = ResponseEntity.status(HttpStatus.CONFLICT).body("Username Already exists");
+                break;
+            default:
+                responseEntity = ResponseEntity.ok().build();
+                break;
+        }
+
+        return responseEntity;
 
     }
 
     @GetMapping(params = {"username", "password"})
     public ResponseEntity<?> authenticateUser(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session) {
         UserResponseDTO userResponseDTO = userService.authenticate(username, password);
-        return switch (userResponseDTO.getStatus()) {
-            case 200 -> {
+        ResponseEntity<?> responseEntity;
+
+        switch (userResponseDTO.getStatus()) {
+            case 200:
                 session.setAttribute("user", userResponseDTO);
-                yield ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
-            }
-            case 401 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Password is incorrect");
-            case 404 ->
-                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with username %s does not exist", username));
-            case 500 ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred while hashing password");
-            default -> ResponseEntity.ok().build();
-        };
+                responseEntity = ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
+                break;
+            case 401:
+                responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body("Password is incorrect");
+                break;
+            case 404:
+                responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with username %s does not exist", username));
+                break;
+            case 500:
+                responseEntity = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred while hashing password");
+                break;
+            default:
+                responseEntity = ResponseEntity.ok().build();
+                break;
+        }
+
+        return responseEntity;
     }
 
     @GetMapping
     public ResponseEntity<?> getAllUsers(HttpSession session) {
         UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+
         AllUsersResponseDTO allUsersResponseDTO = userService.retrieveAll();
         int status = allUsersResponseDTO.getStatus();
+
         if (user == null)
             status = 401;
-        return switch (status) {
-            case 200 -> ResponseEntity.status(HttpStatus.OK).body(allUsersResponseDTO);
-            case 401 -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
-            default -> ResponseEntity.ok().build();
-        };
+
+        ResponseEntity<?> responseEntity;
+        switch (status) {
+            case 200:
+                responseEntity = ResponseEntity.status(HttpStatus.OK).body(allUsersResponseDTO);
+                break;
+            case 401:
+                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
+                break;
+            default:
+                responseEntity = ResponseEntity.ok().build();
+                break;
+        }
+
+        return responseEntity;
     }
 
     @GetMapping(params = "userId")
     public ResponseEntity<?> getUserById(@RequestParam("userId") Long userId, HttpSession session) {
         UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+
         UserResponseDTO userResponseDTO = userService.findById(userId);
         int status = userResponseDTO.getStatus();
+
         if (user == null)
             status = 401;
-        return switch (status) {
-            case 200 -> ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
-            case 401 -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
-            case 404 ->
-                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with id %d does not exist", userId));
-            default -> ResponseEntity.ok().build();
-        };
+
+        ResponseEntity<?> responseEntity;
+        switch (status) {
+            case 200:
+                responseEntity = ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
+                break;
+            case 401:
+                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
+                break;
+            case 404:
+                responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with id %d does not exist", userId));
+                break;
+            default:
+                responseEntity = ResponseEntity.ok().build();
+                break;
+        }
+        return responseEntity;
     }
 }
