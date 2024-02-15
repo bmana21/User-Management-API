@@ -7,6 +7,7 @@ import org.example.usermanagementapi.model.entity.User;
 import org.example.usermanagementapi.repository.UserRepository;
 import org.example.usermanagementapi.service.interfaces.UserService;
 import org.example.usermanagementapi.util.PasswordHashing;
+import org.example.usermanagementapi.util.TokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +30,10 @@ public class UserServiceImpl implements UserService {
             return new UserResponseDTO(400);
         }
         String passwordHash = PasswordHashing.hashPassword(createUserDTO.getPassword());
-        User newUser = new User(createUserDTO.getUsername(), passwordHash, createUserDTO.getFirstname(), createUserDTO.getSurname());
+        String token = TokenGenerator.generateToken();
+        User newUser = new User(createUserDTO.getUsername(), passwordHash, token, createUserDTO.getFirstname(), createUserDTO.getSurname());
         userRepository.save(newUser);
-        return new UserResponseDTO(201, newUser.getUserId(), createUserDTO.getUsername(), createUserDTO.getFirstname(), createUserDTO.getSurname());
+        return new UserResponseDTO(201, newUser.getUserId(), createUserDTO.getUsername(), token, createUserDTO.getFirstname(), createUserDTO.getSurname());
     }
 
     @Override
@@ -47,11 +49,15 @@ public class UserServiceImpl implements UserService {
         if (!passwordHash.equals(user.getPasswordHash())) {
             return new UserResponseDTO(401);
         }
-        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), user.getFirstname(), user.getSurname());
+        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), user.getToken(), user.getFirstname(), user.getSurname());
     }
 
     @Override
-    public AllUsersResponseDTO retrieveAll() {
+    public AllUsersResponseDTO retrieveAll(String token) {
+        User requesterUser = userRepository.findByToken(token);
+        if (requesterUser == null) {
+            return new AllUsersResponseDTO(401);
+        }
         List<User> allUsers = userRepository.findAll();
         AllUsersResponseDTO allUsersResponseDTO = new AllUsersResponseDTO(200);
         for (User user : allUsers) {
@@ -62,11 +68,15 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserResponseDTO findById(Long id) {
+    public UserResponseDTO findById(Long id, String token) {
+        User requesterUser = userRepository.findByToken(token);
+        if (requesterUser == null) {
+            return new UserResponseDTO(401);
+        }
         User user = userRepository.findByUserId(id);
         if (user == null) {
             return new UserResponseDTO(404);
         }
-        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), user.getFirstname(), user.getSurname());
+        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), user.getToken(), user.getFirstname(), user.getSurname());
     }
 }

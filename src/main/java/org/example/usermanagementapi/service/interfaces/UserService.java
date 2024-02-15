@@ -9,7 +9,7 @@ public interface UserService {
 
     UserResponseDTO authenticate(String username, String password);
 
-    AllUsersResponseDTO retrieveAll();
+    AllUsersResponseDTO retrieveAll(String token);
 
-    UserResponseDTO findById(Long id);
+    UserResponseDTO findById(Long id, String token);
 }

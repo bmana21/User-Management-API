@@ -70,15 +70,11 @@ public class UserController {
         return responseEntity;
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAllUsers(HttpSession session) {
-        UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+    @GetMapping(params = "token")
+    public ResponseEntity<?> getAllUsers(@RequestParam("token") String token) {
 
-        AllUsersResponseDTO allUsersResponseDTO = userService.retrieveAll();
+        AllUsersResponseDTO allUsersResponseDTO = userService.retrieveAll(token);
         int status = allUsersResponseDTO.getStatus();
-
-        if (user == null)
-            status = 401;
 
         ResponseEntity<?> responseEntity;
         switch (status) {
@@ -86,7 +82,7 @@ public class UserController {
                 responseEntity = ResponseEntity.status(HttpStatus.OK).body(allUsersResponseDTO);
                 break;
             case 401:
-                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
+                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication Error: Token is not valid");
                 break;
             default:
                 responseEntity = ResponseEntity.ok().build();
@@ -96,15 +92,11 @@ public class UserController {
         return responseEntity;
     }
 
-    @GetMapping(params = "userId")
-    public ResponseEntity<?> getUserById(@RequestParam("userId") Long userId, HttpSession session) {
-        UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+    @GetMapping(params = {"userId", "token"})
+    public ResponseEntity<?> getUserById(@RequestParam("userId") Long userId, @RequestParam("token") String token) {
 
-        UserResponseDTO userResponseDTO = userService.findById(userId);
+        UserResponseDTO userResponseDTO = userService.findById(userId, token);
         int status = userResponseDTO.getStatus();
-
-        if (user == null)
-            status = 401;
 
         ResponseEntity<?> responseEntity;
         switch (status) {
@@ -112,7 +104,7 @@ public class UserController {
                 responseEntity = ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
                 break;
             case 401:
-                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
+                responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication Error: Token is not valid");
                 break;
             case 404:
                 responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with id %d does not exist", userId));
