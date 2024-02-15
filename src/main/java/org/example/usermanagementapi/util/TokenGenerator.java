@@ -13,8 +13,4 @@ public class TokenGenerator {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
 
-    public static void main(String[] args) {
-        String token = generateToken();
-        System.out.println("Generated Token: " + token);
-    }
 }

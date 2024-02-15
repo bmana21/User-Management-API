@@ -1,6 +1,5 @@
 package org.example.usermanagementapi.controller;
 
-import jakarta.servlet.http.HttpSession;
 import org.example.usermanagementapi.model.dto.AllUsersResponseDTO;
 import org.example.usermanagementapi.model.dto.CreateUserDTO;
 import org.example.usermanagementapi.model.dto.UserResponseDTO;
@@ -44,13 +43,12 @@ public class UserController {
     }
 
     @GetMapping(params = {"username", "password"})
-    public ResponseEntity<?> authenticateUser(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session) {
+    public ResponseEntity<?> authenticateUser(@RequestParam("username") String username, @RequestParam("password") String password) {
         UserResponseDTO userResponseDTO = userService.authenticate(username, password);
         ResponseEntity<?> responseEntity;
 
         switch (userResponseDTO.getStatus()) {
             case 200:
-                session.setAttribute("user", userResponseDTO);
                 responseEntity = ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
                 break;
             case 401:
@@ -70,8 +68,8 @@ public class UserController {
         return responseEntity;
     }
 
-    @GetMapping(params = "token")
-    public ResponseEntity<?> getAllUsers(@RequestParam("token") String token) {
+    @GetMapping
+    public ResponseEntity<?> getAllUsers(@RequestHeader("Authorization") String token) {
 
         AllUsersResponseDTO allUsersResponseDTO = userService.retrieveAll(token);
         int status = allUsersResponseDTO.getStatus();
@@ -92,8 +90,8 @@ public class UserController {
         return responseEntity;
     }
 
-    @GetMapping(params = {"userId", "token"})
-    public ResponseEntity<?> getUserById(@RequestParam("userId") Long userId, @RequestParam("token") String token) {
+    @GetMapping(params = "userId")
+    public ResponseEntity<?> getUserById(@RequestParam("userId") Long userId, @RequestHeader("Authorization") String token) {
 
         UserResponseDTO userResponseDTO = userService.findById(userId, token);
         int status = userResponseDTO.getStatus();
