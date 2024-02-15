@@ -77,6 +77,6 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             return new UserResponseDTO(404);
         }
-        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), user.getToken(), user.getFirstname(), user.getSurname());
+        return new UserResponseDTO(200, user.getUserId(), user.getUsername(), "", user.getFirstname(), user.getSurname());
     }
 }
