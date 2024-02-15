@@ -1,5 +1,6 @@
 package org.example.usermanagementapi.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.usermanagementapi.model.dto.AllUsersResponseDTO;
 import org.example.usermanagementapi.model.dto.CreateUserDTO;
 import org.example.usermanagementapi.model.dto.UserResponseDTO;
@@ -9,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,31 +32,46 @@ public class UserController {
     }
 
     @GetMapping(params = {"username", "password"})
-    public ResponseEntity<?> authenticateUser(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public ResponseEntity<?> authenticateUser(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session) {
         UserResponseDTO userResponseDTO = userService.authenticate(username, password);
         return switch (userResponseDTO.getStatus()) {
-            case 200 -> ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
+            case 200 -> {
+                session.setAttribute("user", userResponseDTO);
+                yield ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
+            }
+            case 401 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Password is incorrect");
             case 404 ->
                     ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with username %s does not exist", username));
-            case 401 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Password is incorrect");
+            case 500 ->
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred while hashing password");
             default -> ResponseEntity.ok().build();
         };
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(HttpSession session) {
+        UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
         AllUsersResponseDTO allUsersResponseDTO = userService.retrieveAll();
-        return switch (allUsersResponseDTO.getStatus()) {
+        int status = allUsersResponseDTO.getStatus();
+        if (user == null)
+            status = 401;
+        return switch (status) {
             case 200 -> ResponseEntity.status(HttpStatus.OK).body(allUsersResponseDTO);
+            case 401 -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
             default -> ResponseEntity.ok().build();
         };
     }
 
     @GetMapping(params = "userId")
-    public ResponseEntity<?> getUserById(@RequestParam("userId") Long userId) {
+    public ResponseEntity<?> getUserById(@RequestParam("userId") Long userId, HttpSession session) {
+        UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
         UserResponseDTO userResponseDTO = userService.findById(userId);
-        return switch (userResponseDTO.getStatus()) {
+        int status = userResponseDTO.getStatus();
+        if (user == null)
+            status = 401;
+        return switch (status) {
             case 200 -> ResponseEntity.status(HttpStatus.OK).body(userResponseDTO);
+            case 401 -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication is required");
             case 404 ->
                     ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("User with id %d does not exist", userId));
             default -> ResponseEntity.ok().build();

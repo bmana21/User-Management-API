@@ -41,6 +41,9 @@ public class UserServiceImpl implements UserService {
             return new UserResponseDTO(404);
         }
         String passwordHash = PasswordHashing.hashPassword(password);
+        if (passwordHash == null) {
+            return new UserResponseDTO(500);
+        }
         if (!passwordHash.equals(user.getPasswordHash())) {
             return new UserResponseDTO(401);
         }
