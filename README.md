@@ -6,12 +6,13 @@ Below you can view the documentation for running the application with/without do
 ## Technologies Used
 
 - Java 11
--  Maven
+- Maven
 - Spring Boot
 - H2 Database
 - JUnit
 - Mockito
 - Docker
+- Swagger UI
 
 
 ## Docker Documentation for usage
@@ -43,54 +44,69 @@ docker run -p 8080:8080 user-management-app:latest
 
 The API will now be accessible at http://localhost:8080
 
-## API Documentation, Endpoints and Usage Examples
+## API Documentation, Endpoints, and Usage Examples
 
+You can interact with the API on this URL: http://localhost:8080/swagger-ui/index.html
+
+
+I also included the API documentation in this file.
 ### Create New User
 `POST /api/users`
-  - Creates New User
-  - Requires Username, Password, First name, and Surname
-  - Returns Newly created User with Api Key(Token) which will be used for authentication later
-  - If the Username or Password is in invalid format, or the Username is taken, returns according error message
-  
+- Creates New User
+- Requires fields: `username`, `password`, `firstname`, and `surname`
+- Returns Newly created User with Api Key(Token) which will be used for authentication later
+- If the Username or Password is in invalid format, or the Username is taken, returns according error message
+
 Example with curl:
  ```bash
- curl -X POST -H "Content-Type: application/json" -d '{
-  "username": "beso123",
-  "password": "password",
-  "firstname": "Beso",
-  "surname": "Managadze"
-}' http://localhost:8080/api/users
+curl -X 'POST' \
+  'http://localhost:8080/api/users' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "username": "string",
+  "password": "string",
+  "firstname": "string",
+  "surname": "string"
+}'
  ```
 ### Authentication
-`GET /api/users?username={username}&password={password}`
-  - Requires username and password for authentication
-  - Returns User with Api Key(Token) which will be used for authentication later
-  - If the Username does not exist or the password is incorrect, return according to error message
-  
+`GET /api/users/auth`
+- Requires `username` and `password` fields for authentication
+- Returns User with Api Key(Token) which will be used for authentication later)
+- If the Username does not exist or the password is incorrect, return according to error message
+
 Example with curl:
  ```bash
-curl -X GET "http://localhost:8080/api/users?username=beso123&password=password"
+curl -X 'GET' \
+  'http://localhost:8080/api/users/auth?username=string&password=string' \
+  -H 'accept: application/json'
  ```
 ### Retrieve all users
 `GET /api/users`
-  - Requires API key (Token) for authorization purposes, it should be passed in a header.
-  - Retrieves all users from the Database
-  - If the API key (token) is not valid, return according error message
+- Requires API key (`X-API-KEY` as the header) for authorization purposes, it should be passed in a header.
+- Retrieves all users from the Database
+- If the API key (token) is not valid, return according error message
 
 Example with curl:
  ```bash
-curl -H "Authorization: 782e060c3ff5883fa82a1fc7306a2481 "http://localhost:8080/api/users"
+curl -X 'GET' \
+  'http://localhost:8080/api/users' \
+  -H 'accept: application/json' \
+  -H 'X-API-KEY: string'
  ```
-### Retrieve User with specific ID
-`GET /api/users?userId={userId}`
-  - Requires API key (Token) for authorization purposes, it should be passed in a header.
-  - Returns User with according userId
-  - If Usern does not exist or the API key (token) is not valid, returns according error message
-  
+### Retrieve User with the specific ID
+`GET /api/users/{userId}`
+- Requires API key (`X-API-KEY` as the header) for authorization purposes, it should be passed in a header.
+- Returns User with according userId
+- If Usern does not exist or the API key (token) is not valid, returns according error message
+
 Example with curl:
  ```bash
-curl -H "Authorization: 782e060c3ff5883fa82a1fc7306a2481 "http://localhost:8080/api/users?userId=253"
+curl -X 'GET' \
+  'http://localhost:8080/api/users/1' \
+  -H 'accept: application/json' \
+  -H 'X-API-KEY: string'
  ```
-  
 
   
